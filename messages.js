@@ -13,7 +13,7 @@ export default class Message{
         this.passwordRequired = `🔐 Please enter the password to access:`
         this.passwordAccept = `✅ Password accepted. You can now enter commands`
         this.logoff = `🚪 You're out. Re-enter the password`
-        this.error = `❌ Error:\n`
+        this.commandError = `❌ Error:\n`
         this.commandSuccess = `✅ The command was executed without output`
     }
 }

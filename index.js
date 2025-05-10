@@ -72,7 +72,7 @@ bot.on('message', async (msg) => {
     // выполнение shell-команды
     exec(text, { timeout: 10000 }, (error, stdout, stderr) => {
         if (error) {
-            return bot.sendMessage(chatId, Messages.error + error.message)
+            return bot.sendMessage(chatId, Messages.commandError + error.message)
         }
 
         let output = stderr || stdout || Messages.commandSuccess
