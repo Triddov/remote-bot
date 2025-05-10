@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js",
-    "prod": "pm2 start index.js --name remote_bot"
+    "start": "pm2 start index.js --name remote_bot",
+    "status": "pm2 monit && pm2 list",
+    "stop": "pm2 stop remote_bot"
   },
   "keywords": [],
   "author": "",
