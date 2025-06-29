@@ -14,7 +14,6 @@ const CHAT_ID = process.env.CHAT_ID
 const PASSWD_HASH = process.env.PASSWD_HASH
 
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000  // 5 минут
-const COMMAND_EXEC_TIMEOUT = 10 * 1000    // 10 секунд
 
 const session = {
     [CHAT_ID]: {
@@ -58,10 +57,12 @@ bot.on('message', async (msg) => {
 
         userSession.shell.stdout.on('data', (data) => {
             userSession.buffer += data.toString()
+            resetInactivityTimeout()
         })
 
         userSession.shell.stderr.on('data', (data) => {
             userSession.buffer += data.toString()
+            resetInactivityTimeout()
         })
 
         userSession.shell.on('close', () => {
@@ -138,7 +139,7 @@ bot.on('message', async (msg) => {
                 userSession.shell = null
                 bot.sendMessage(chatId, Messages.tooLong)
             }
-        }, COMMAND_EXEC_TIMEOUT)
+        }, INACTIVITY_TIMEOUT)
 
         setTimeout(() => {
             const output = userSession.buffer.trim() || Messages.commandSuccess

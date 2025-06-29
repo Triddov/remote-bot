@@ -19,9 +19,10 @@ export default class Message{
         this.commandError = `❌ Error:\n`
         this.wakeOnLan = `wakeonlan -i 192.168.1.255 18:c0:4d:a2:05:79`
         this.commandSuccess = `✅ The command was executed without output`
-        this.newBash = `No active bash-session`
-        this.emptyBash = `spawn new bash-session`
+        this.newBash = `Spawn new bash-session. Now write your command`
+        this.emptyBash = `No active bash-session`
         this.stopBash = `Bash-session stopped by hands`
+        this.endBash = `Bash-session ended`
         this.tooLong = `Command execution is way too long. Bash-session killed`
         this.tooUnactive = `Bash-session terminated due to inactivity`
     }
