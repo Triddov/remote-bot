@@ -4,7 +4,8 @@ if [ -d node_modules ]; then
 else
     echo "set up the project environment..."
     npm ci
-  touch .env access.log history.log
+    touch .env
+    mkdir -p logs && touch logs/combined.log logs/error.log
     echo "set up done, don't forget to add env variables"
 fi
 

@@ -1,7 +1,4 @@
 *.env*
 .idea/
 node_modules/
-
-
-history.log
-access.log
+logs/

@@ -2,11 +2,10 @@
 
 import TelegramBot from 'node-telegram-bot-api'
 import { spawn } from 'child_process'
-import { writeFile } from 'fs/promises'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 import BotMessage from "./messages.js"
-import formattedDate from "./getDate.js"
+import logger from './logger.js'
 
 dotenv.config()
 const BOT_TOKEN = process.env.BOT_TOKEN
@@ -37,8 +36,7 @@ bot.on('message', async (msg) => {
     const Messages = new BotMessage(username)
 
     if (chatId !== parseInt(CHAT_ID)) {
-        await writeFile("./access.log", `[${formattedDate()}] - login attempt: ${chatId} ${firstName} ${username}\n`,
-            { encoding: "utf8", flag: "a" })
+        logger.warn(`login attempt: ${chatId} ${firstName} ${username}`)
         return bot.sendMessage(chatId, Messages.unauthorized)
     }
 
@@ -57,12 +55,10 @@ bot.on('message', async (msg) => {
 
         userSession.shell.stdout.on('data', (data) => {
             userSession.buffer += data.toString()
-            resetInactivityTimeout()
         })
 
         userSession.shell.stderr.on('data', (data) => {
             userSession.buffer += data.toString()
-            resetInactivityTimeout()
         })
 
         userSession.shell.on('close', () => {
@@ -96,8 +92,7 @@ bot.on('message', async (msg) => {
         }
     }
 
-    await writeFile("./history.log", `[${formattedDate()}] - ${text} ${(username !== "triddov") ? username : ""}\n`,
-        { encoding: "utf8", flag: "a" })
+    logger.info(`${text} ${(username !== "triddov") ? username : ""}`)
 
     switch (text) {
         case '/start':
