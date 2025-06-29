@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "pm2 start index.js --name remote_bot",
+    "start:dev": "nodemon index.js",
+    "start:prod": "pm2 start index.js --name remote_bot",
     "status": "pm2 monit && pm2 list",
+    "logs": "pm2 logs remote_bot",
     "stop": "pm2 stop remote_bot"
   },
   "keywords": [],
-  "author": "",
+  "author": "triddov",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
