@@ -17,7 +17,7 @@ export default class Message{
         this.passwordAccept = `✅ Password accepted. You can now enter commands`
         this.logoff = `🚪 You're out. Re-enter the password`
         this.commandError = `❌ Error:\n`
-        this.wakeOnLan = `wakeonlan -i 192.168.1.255 18:c0:4d:a2:05:79`
+        this.wakeOnLanCommand = `wakeonlan -i 192.168.1.255 18:c0:4d:a2:05:79`
         this.commandSuccess = `✅ The command was executed without output`
         this.newBash = `Spawn new bash-session. Now write your command`
         this.emptyBash = `No active bash-session`

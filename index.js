@@ -1,13 +1,11 @@
-'use strict'
-
 import TelegramBot from 'node-telegram-bot-api'
-import { spawn } from 'child_process'
+import { spawn, exec } from 'child_process'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 import BotMessage from "./messages.js"
 import logger from './logger.js'
 
-dotenv.config()
+dotenv.config({path: '.env'})
 const BOT_TOKEN = process.env.BOT_TOKEN
 const CHAT_ID = process.env.CHAT_ID
 const PASSWD_HASH = process.env.PASSWD_HASH
@@ -46,10 +44,35 @@ bot.on('message', async (msg) => {
 
     const userSession = session[chatId]
 
+    const clearAllTimeouts = () => {
+        clearTimeout(userSession.timeoutHandle)
+        clearTimeout(userSession.commandTimeoutHandle)
+    }
+
+    const stopShell = () => {
+        if (userSession.shell) userSession.shell.kill()
+        userSession.shell = null
+        clearAllTimeouts()
+    }
+
+    const resetInactivityTimeout = () => {
+        clearTimeout(userSession.timeoutHandle)
+        userSession.timeoutHandle = setTimeout(() => {
+            stopShell()
+            bot.sendMessage(chatId, Messages.tooUnactive)
+        }, INACTIVITY_TIMEOUT)
+    }
+
+    const resetCommandTimeout = () => {
+        clearTimeout(userSession.commandTimeoutHandle)
+        userSession.commandTimeoutHandle = setTimeout(() => {
+            stopShell()
+            bot.sendMessage(chatId, Messages.tooLong)
+        }, INACTIVITY_TIMEOUT)
+    }
 
     const startShell = () => {
-        if (userSession.shell) userSession.shell.kill()
-
+        stopShell()
         userSession.shell = spawn('bash', [], { stdio: 'pipe' })
         userSession.buffer = ''
 
@@ -62,24 +85,10 @@ bot.on('message', async (msg) => {
         })
 
         userSession.shell.on('close', () => {
-            userSession.shell = null
-            clearTimeout(userSession.timeoutHandle)
-            clearTimeout(userSession.commandTimeoutHandle)
+            stopShell()
         })
 
         resetInactivityTimeout()
-    }
-
-    // Сброс таймера неактивности
-    const resetInactivityTimeout = () => {
-        clearTimeout(userSession.timeoutHandle)
-        userSession.timeoutHandle = setTimeout(() => {
-            if (userSession.shell) {
-                userSession.shell.kill()
-                userSession.shell = null
-                bot.sendMessage(chatId, Messages.tooUnactive)
-            }
-        }, INACTIVITY_TIMEOUT)
     }
 
     if (!userSession.authenticated) {
@@ -101,18 +110,14 @@ bot.on('message', async (msg) => {
             return bot.sendMessage(chatId, Messages.help)
         case '/logoff':
             userSession.authenticated = false
-            if (userSession.shell) userSession.shell.kill()
-            userSession.shell = null
-            clearTimeout(userSession.timeoutHandle)
-            clearTimeout(userSession.commandTimeoutHandle)
+            stopShell()
             return bot.sendMessage(chatId, Messages.logoff)
         case '/lan':
-            return bot.sendMessage(chatId, Messages.wakeOnLan)
+            exec(Messages.wakeOnLanCommand)
+            return bot.sendMessage(chatId, Messages.commandSuccess)
         case '/killbash':
             if (userSession.shell) {
-                userSession.shell.kill()
-                userSession.shell = null
-                clearTimeout(userSession.timeoutHandle)
+                stopShell()
                 return bot.sendMessage(chatId, Messages.stopBash)
             }
             return bot.sendMessage(chatId, Messages.emptyBash)
@@ -126,15 +131,7 @@ bot.on('message', async (msg) => {
         resetInactivityTimeout()
 
         userSession.shell.stdin.write(text + '\n')
-
-        clearTimeout(userSession.commandTimeoutHandle)
-        userSession.commandTimeoutHandle = setTimeout(() => {
-            if (userSession.shell) {
-                userSession.shell.kill()
-                userSession.shell = null
-                bot.sendMessage(chatId, Messages.tooLong)
-            }
-        }, INACTIVITY_TIMEOUT)
+        resetCommandTimeout()
 
         setTimeout(() => {
             const output = userSession.buffer.trim() || Messages.commandSuccess
